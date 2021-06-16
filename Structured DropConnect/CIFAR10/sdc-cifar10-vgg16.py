@@ -299,7 +299,6 @@ def sdc_uncetainty():
 
 
 
-#这个函数并没用上？？？
 def cosine_anneal_schedule(t):
     cos_inner = np.pi * (t % (nb_epoch))  # t - 1 is used when t has 1-based indexing.
     cos_inner /= (nb_epoch)
