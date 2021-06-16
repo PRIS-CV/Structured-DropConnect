@@ -1,1 +1,3 @@
 # Structured-DropConnect
+
+For image classification tasks, we propose a structured DropConnect (SDC) framework to model the output of a deep neural network by a Dirichlet distribution. We introduce a DropConnect strategy on weights in the fully connected layers during training. In test, we split the network into several sub-networks, and then model the Dirichlet distribution by match its moments with the mean and variance of the outputs of these sub-networks. The entropy of the estimated Dirichlet distribution is finally utilized for uncertainty inference. In this paper, this framework is implemented on LeNet5 and VGG16 models
