@@ -60,7 +60,7 @@ def mcdp_entropy_expected(probs, epsilon=1e-8):
 def mcdp_mutual_information(probs, epsilon=1e-8):
     entropy_of_expected = mcdp_entropy_expected(probs, epsilon=epsilon)
     expected_entropy = mcdp_expected_entropy(probs, epsilon=epsilon)
-    mutual_information = entropy_of_expected - expected_entropy    #相互的信息，用减法计算
+    mutual_information = entropy_of_expected - expected_entropy
     return mutual_information
 
 def mcdp_max_probability(probs, epsilon=1e-8):
