@@ -115,7 +115,7 @@ class DropConnectLinear(nn.Module):
         self.rho = rho
         self.loop = loop
         self.mask = mask
-        #Parameter()：将参数转换为可训练的类型，并且绑定在module的parameter列表当中，可以被训练、优化。
+        #Parameter()：
         self.weight = nn.Parameter(torch.Tensor(out_features, in_features))
         if bias:
             self.bias = nn.Parameter(torch.Tensor(out_features))
@@ -136,9 +136,9 @@ class DropConnectLinear(nn.Module):
             mask_dc = torch.bernoulli(m).cuda()
             out = F.linear(input, self.weight.mul(mask_dc), self.bias)
         else:
-            if(loop == 0):      #不适用structured 切片进行测试，正常测试
+            if(loop == 0):      #normal test
                 out = F.linear(input, self.weight, self.bias)
-            else:
+            else:    #test with SDC
                 out = F.linear(input, self.weight.mul(self.mask[index]), self.bias)
         return out
 
@@ -198,7 +198,7 @@ def train(epoch):
         optimizer.step()
 
         train_loss += loss.detach().cpu()
-        _, predicted = torch.max(outputs, -1)    #-1是最后一个维度，一般也就是按行
+        _, predicted = torch.max(outputs, -1)
 
         correct += predicted.eq(targets.data).sum().item()
         total += targets.size(0)
@@ -291,7 +291,6 @@ def sdc_uncetainty():
 
 
 
-#这个函数并没用上
 def cosine_anneal_schedule(t):
     cos_inner = np.pi * (t % (nb_epoch))  # t - 1 is used when t has 1-based indexing.
     cos_inner /= (nb_epoch)
@@ -312,7 +311,7 @@ def dnn_uncetainty():
 
     probs = np.array(probs_list)
     targets = np.array(targets_list)
-    auc_max_prob, auc_ent, aupr_max_prob, aupr_ent = dnn_auc(probs, targets)    #在参数估计的函数框里面定义了，返回四个值
+    auc_max_prob, auc_ent, aupr_max_prob, aupr_ent = dnn_auc(probs, targets)
     print('AUROC of Max.P/Ent.: %.4f %.4f' % (auc_max_prob, auc_ent))
     print('AUPR  of Max.P/Ent.: %.4f %.4f' % (aupr_max_prob, aupr_ent))
     print('###################\n\n')
@@ -376,7 +375,7 @@ else:
         print("the max_val_acc === ", max_val_acc)
 
 
-'''
+
 
 if(loop != 0):
     print('SDC Uncertainty')
@@ -396,6 +395,3 @@ mcdropout(t_mc=t_mc)
 t_mc = 10
 print('Times: %d' % t_mc)
 mcdropout(t_mc=t_mc)
-
-
-'''
