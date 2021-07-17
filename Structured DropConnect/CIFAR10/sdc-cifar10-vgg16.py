@@ -74,24 +74,24 @@ trainloader = torch.utils.data.DataLoader(trainset, batch_size=BATCH_SIZE, shuff
 testset = torchvision.datasets.CIFAR10(root='/data2/zhengwenqing/data', train=False, download=True, transform=transform_test)
 testloader = torch.utils.data.DataLoader(testset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
 
-#用于uncertainty inference
+#for uncertainty inference
 uiset = torchvision.datasets.CIFAR10(root='/data2/zhengwenqing/data', train=False, download=True, transform=transform_test)
 uiloader = torch.utils.data.DataLoader(uiset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4)
 
 # Model
 
 net = models.vgg16_bn(pretrained=False)
-net = list(net.features)    #只下载了vgg_bn的feature部分，全连接部分没有选择
+net = list(net.features)
 for i in range(len(net)):
-    if isinstance(net[i], nn.ReLU):    #用来判断一个函数是否是已知的类型，第二个参数是类型（可以是类名、基本类型）
-        net[i] = nn.LeakyReLU(0.2, inplace=True)    #意思是每一层的ReLU都换成LeakyReLU
+    if isinstance(net[i], nn.ReLU):
+        net[i] = nn.LeakyReLU(0.2, inplace=True)
 net = nn.Sequential(*net)
 
 class model_bn(nn.Module):
     def __init__(self, model, feature_size, classes_num):
         super(model_bn, self).__init__() 
         self.features_1 = net
-        self.num_ftrs = 512*1*1     #vgg_bn的卷积最后一层输出是512*1*1
+        self.num_ftrs = 512*1*1
 
         self.batch1 = nn.BatchNorm1d(self.num_ftrs)
         self.fc1 = DropConnectLinear(self.num_ftrs, feature_size, rho, loop, mask1)
@@ -133,7 +133,6 @@ class DropConnectLinear(nn.Module):
         self.rho = rho
         self.loop = loop
         self.mask = mask
-        #Parameter()：将参数转换为可训练的类型，并且绑定在module的parameter列表当中，可以被训练、优化。
         self.weight = nn.Parameter(torch.Tensor(out_features, in_features))
         if bias:
             self.bias = nn.Parameter(torch.Tensor(out_features))
@@ -154,9 +153,9 @@ class DropConnectLinear(nn.Module):
             mask_dc = torch.bernoulli(m).cuda()
             out = F.linear(input, self.weight.mul(mask_dc), self.bias)
         else:
-            if(loop == 0):      #不适用structured 切片进行测试，正常测试
+            if(loop == 0):      #normal test
                 out = F.linear(input, self.weight, self.bias)
-            else:
+            else:    #test with SDC
                 out = F.linear(input, self.weight.mul(self.mask[index]), self.bias)
         return out
 
@@ -220,7 +219,7 @@ def train(epoch):
         optimizer.step()
 
         train_loss += loss.detach().cpu()
-        _, predicted = torch.max(outputs, -1)       #返回最大值所代表的类别
+        _, predicted = torch.max(outputs, -1)
         correct += predicted.eq(targets.data).sum().item()
         total += targets.size(0)
         
@@ -243,7 +242,7 @@ def test(epoch):
         inputs, targets = inputs.to(device), targets.to(device)
         outputs = net(inputs,0)
 
-        loss = criterion(outputs, targets)      #相比于train少了loss反传和优化器
+        loss = criterion(outputs, targets)
 
         test_loss += loss.detach().cpu()
         total += targets.size(0)
@@ -306,20 +305,20 @@ def cosine_anneal_schedule(t):
     return float( 0.1 / 2 * cos_out)
 
 def dnn_uncetainty():
-    net.eval()      #首先进入模型测试步骤
+    net.eval()
     probs_list = []
     targets_list = []
     for batch_idx, (inputs, targets) in enumerate(uiloader):
         inputs = inputs.to(device)
         outputs = net(inputs,0)
-        outputs = F.softmax(outputs, dim=1)     #在这里作softmax输出，输出的是概率值，放在probs_list[]里面
+        outputs = F.softmax(outputs, dim=1)
 
         probs_list += list(outputs.data.cpu().numpy())
         targets_list += list(targets.data.numpy())
 
     probs = np.array(probs_list)
     targets = np.array(targets_list)
-    auc_max_prob, auc_ent, aupr_max_prob, aupr_ent = dnn_auc(probs, targets)    #在参数估计的函数框里面定义了，返回四个值
+    auc_max_prob, auc_ent, aupr_max_prob, aupr_ent = dnn_auc(probs, targets)
     print('AUROC of Max.P/Ent.: %.4f %.4f' % (auc_max_prob, auc_ent))
     print('AUPR  of Max.P/Ent.: %.4f %.4f' % (aupr_max_prob, aupr_ent))
     print('###################\n\n')
