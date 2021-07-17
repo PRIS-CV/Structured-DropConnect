@@ -381,7 +381,7 @@ else:
         print("the max_val_acc === ", max_val_acc)
 
 
-'''
+
 if(loop != 0):
     print('SDC Uncertainty')
     sdc_uncetainty()
@@ -412,4 +412,4 @@ mcdropout(t_mc=t_mc)
 t_mc = 10
 print('Times: %d' % t_mc)
 mcdropout(t_mc=t_mc)
-'''
+
