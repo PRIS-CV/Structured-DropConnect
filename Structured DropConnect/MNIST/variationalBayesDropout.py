@@ -39,7 +39,7 @@ class vbdcLinear(Module):
         self.in_features = in_features
         self.out_features = out_features
         self.rou = rou
-        #Parameter()：将参数转换为可训练的类型，并且绑定在module的parameter列表当中，可以被训练、优化。
+        #Parameter()
         self.weight = Parameter(torch.Tensor(out_features, in_features))
         if bias:
             self.bias = Parameter(torch.Tensor(out_features))
@@ -47,18 +47,7 @@ class vbdcLinear(Module):
             self.register_parameter('bias', None)
         self.reset_parameters()
 
-        #这些都可以删掉，只要一个rou，就是伯努利分布
-        '''
-        self.init_a = init_a
-        self.init_b = init_b
-        self.init_mu = np.log(init_a ** 1.25) - np.log(init_b ** 1.25)
-        self.init_sigma = (1 / init_a + 1 / init_b) ** 0.75
-        self.mu = Parameter(torch.ones([out_features, in_features]) * self.init_mu)
-        self.sigma = Parameter(torch.ones([out_features, in_features]) * self.init_sigma)
-        '''
 
-
-    #这个函数的作用是什么？需要保留吗？
     def reset_parameters(self):
         init.kaiming_uniform_(self.weight, a=math.sqrt(5))
         if self.bias is not None:
