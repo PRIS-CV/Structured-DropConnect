@@ -13,7 +13,7 @@ def aupr(rightwrong, measure, pos_label=1):
         measure *= -1.0
 
     precision, recall, thresholds = precision_recall_curve(rightwrong, measure)
-    return auc(recall, precision)   #计算面积
+    return auc(recall, precision)
 
 def auroc(rightwrong, measure, pos_label=1):
     measure = np.asarray(measure, dtype=np.float128)[:, np.newaxis]
@@ -60,7 +60,7 @@ def mcdp_entropy_expected(probs, epsilon=1e-8):
 def mcdp_mutual_information(probs, epsilon=1e-8):
     entropy_of_expected = mcdp_entropy_expected(probs, epsilon=epsilon)
     expected_entropy = mcdp_expected_entropy(probs, epsilon=epsilon)
-    mutual_information = entropy_of_expected - expected_entropy    #相互的信息，用减法计算
+    mutual_information = entropy_of_expected - expected_entropy
     return mutual_information
 
 def mcdp_max_probability(probs, epsilon=1e-8):
