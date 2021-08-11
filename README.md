@@ -1,6 +1,6 @@
 # Structured-DropConnect
 
-Code realease for Structured DropConnect for Uncertainty Inference in ImageClassification [arXiv:2106.08624](https://arxiv.org/abs/2106.08624).
+Code realease for Structured DropConnect for Uncertainty Inference in Image Classification [arXiv:2106.08624](https://arxiv.org/abs/2106.08624).
 
 # Changelog
 * 2021/07/17 upload the code.
